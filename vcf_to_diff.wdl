@@ -85,6 +85,15 @@ task make_mask_and_diff {
 		# okay, we have information about this file. is it above the removal threshold?
 		echo "$this_files_info" > temp
 		amount_low_coverage=$(cut -f2 temp)
+		
+		# account for very tiny numbers
+		if [[ "$amount_low_coverage" == *"e"* ]]
+		then
+			echo "Scientific notation detected, so it's likely this sample is very much passing."
+			echo "PASS" >> ERROR
+			exit 0
+		fi
+		
 		percent_low_coverage=$(echo "$amount_low_coverage"*100 | bc)
 		echo "$percent_low_coverage percent of ~{basename_vcf} is below ~{min_coverage_per_site}x coverage."
 		
@@ -187,6 +196,15 @@ task make_diff_from_vcf_and_mask {
 		# okay, we have information about this file. is it above the removal threshold?
 		echo "$this_files_info" > temp
 		amount_low_coverage=$(cut -f2 temp)
+		
+		# account for very tiny numbers
+		if [[ "$amount_low_coverage" == *"e"* ]]
+		then
+			echo "Exponent detected. Passing this sample with no further calculations..."
+			echo "PASS" >> ERROR
+			exit 0
+		fi
+		
 		percent_low_coverage=$(echo "$amount_low_coverage"*100 | bc)
 		echo "$percent_low_coverage percent of ~{basename_vcf} is below ~{min_coverage_per_site}x coverage."
 		
