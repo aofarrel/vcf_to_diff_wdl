@@ -202,7 +202,7 @@ task make_diff_from_vcf_and_mask {
 		# account for very tiny numbers
 		if [[ "$amount_low_coverage" == *"e"* ]]
 		then
-			echo "Exponent detected. Passing this sample with no further calculations..."
+			echo "Scientific notation detected, so it's likely this sample is very much passing."
 			echo "PASS" >> ERROR
 			exit 0
 		fi
