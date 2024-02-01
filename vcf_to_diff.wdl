@@ -1,6 +1,8 @@
 version 1.0
 
 task make_mask_and_diff {
+	# This is the version currently used by myco!
+	#
 	# This combines the creation of the bed graph histogram mask file and the
 	# creation of the diff file into one WDL task. Sometimes, in WDL, it is
 	# easier to combine tasks to avoid shenanigans with the Array[File] type.
@@ -181,7 +183,7 @@ task make_diff_from_vcf_and_mask {
 	fi
 	
 	echo "Pulling diff script..."
-	wget https://raw.githubusercontent.com/aofarrel/parsevcf/1.1.8/vcf_to_diff_script.py
+	wget https://raw.githubusercontent.com/aofarrel/parsevcf/1.3.0/vcf_to_diff_script.py
 	echo "Running script..."
 	python3 vcf_to_diff_script.py -v ~{vcf} \
 	-d . \
