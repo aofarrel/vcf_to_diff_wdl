@@ -72,7 +72,7 @@ task make_mask_and_diff {
 	fi
 	
 	echo "Pulling diff script..."
-	wget https://raw.githubusercontent.com/aofarrel/parsevcf/1.3.0/vcf_to_diff_script.py
+	wget https://raw.githubusercontent.com/aofarrel/parsevcf/1.3.1/vcf_to_diff_script.py
 	echo "Running script..."
 	python3 vcf_to_diff_script.py -v ~{vcf} \
 	-d . \
@@ -183,7 +183,7 @@ task make_diff_from_vcf_and_mask {
 	fi
 	
 	echo "Pulling diff script..."
-	wget https://raw.githubusercontent.com/aofarrel/parsevcf/513b903214ab08c35a07d37bbfdf0c10b2a037f5/vcf_to_diff_script.py
+	wget https://raw.githubusercontent.com/aofarrel/parsevcf/1.3.1/vcf_to_diff_script.py
 	echo "Running script..."
 	python3 vcf_to_diff_script.py -v ~{vcf} \
 	-d . \
