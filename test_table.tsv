@@ -1,0 +1,6 @@
+entity:sample_id	county	date_collected	median_coverage	mean_coverge
+foo	SF			5
+bar	['']	2025-01-01	5	5
+bizz	Lake	2025-01-02	9	8.5
+buzz			
+zip	LA	''	20	[]
