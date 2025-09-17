@@ -115,8 +115,6 @@ task make_mask_and_diff_and_process_metadata {
 		then
 			echo "Scientific notation detected, so it's likely this sample is very much passing."
 			echo "PASS" >> ERROR
-		
-		# not using scientific notation
 		else
 			percent_low_coverage=$(echo "$amount_low_coverage"*100 | bc)
 			maximium_percent_low_coverage=$(echo "~{max_ratio_low_coverage_sites_per_sample}*100" | bc)
@@ -128,7 +126,6 @@ task make_mask_and_diff_and_process_metadata {
 			then
 				# amount of low coverage is BELOW the removal threshold: sample passes
 				echo "PASS" >> ERROR
-		
 			else
 				# amount of low coverage is ABOVE the removal threshold: sample fails
 				if [[ "~{force_diff}" == "false" ]]
@@ -137,7 +134,7 @@ task make_mask_and_diff_and_process_metadata {
 				fi
 				pretty_percent=$(printf "%0.2f" "$percent_low_coverage")
 				echo FAILURE - "$pretty_percent""%" is above "~{max_ratio_low_coverage_sites_per_sample}""%" cutoff
-				echo VCF2DIFF_"$pretty_percent"_PCT_BELOW_"~{min_coverage_per_site}"x_COVERAGE_(MAX_"~{maximium_percent_low_coverage}"_PCT) >> ERROR
+				echo VCF2DIFF_"$pretty_percent"_PCT_BELOW_"~{min_coverage_per_site}"x_COVERAGE_"("MAX_"$maximium_percent_low_coverage"_PCT")" >> ERROR
 
 				end=$(date +%s)
 				seconds=$(echo "$end - $start" | bc)
@@ -150,7 +147,7 @@ task make_mask_and_diff_and_process_metadata {
 	fi
 
 	# this section only exectures if not failing
-	python3 CODE <<
+	python3 << CODE
 	a_key =  "~{a_key}"
 	a_value = "~{a_value}"
 	b_key =  "~{b_key}"
@@ -166,12 +163,12 @@ task make_mask_and_diff_and_process_metadata {
 	for key in [a_key, b_key, c_key, d_key, e_key]:
 		if key == '' or key == ' ':
 			key = "UNDEFINED"
-		valid_keys.append(key)
+		valid_keys.append(key.strip("'").strip('"'))
 	valid_values = []
 	for value in [a_value, b_value, c_value, d_value, e_value]:
 		if value == '' or value == ' ':
 				value = "UNDEFINED"
-			valid_values.append(value)
+			valid_values.append(value.strip("'").strip('"'))
 
 	metadata_dict = {a_key: a_value, b_key: b_value, c_key: c_value, d_key: d_value, e_key: e_value}
 	valid_metadata_dict = dict()
@@ -220,8 +217,8 @@ task make_mask_and_diff_and_process_metadata {
 		File? diff = basename_vcf+".diff"
 		File? report = basename_vcf+".report"
 		File? histogram = "histogram.txt"
-		String? metadata_fields = read_string("header.txt")
-		String? metadata_values = read_string("body.txt")
+		String? metadata_fields = read_string("header.txt") #!UnnecessaryQuantifier
+		String? metadata_values = read_string("body.txt")   #!UnnecessaryQuantifier
 		String errorcode = read_string("ERROR")
 	}
 }
