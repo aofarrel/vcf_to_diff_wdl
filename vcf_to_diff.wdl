@@ -23,6 +23,21 @@ task make_mask_and_diff_and_process_metadata {
 		File? tbmf
 		File vcf
 
+		# metadata key-value pairs; key is the name of the field, value is... value
+		# there are complex types that could in theory do this, but Cromwell's
+		# handling of optional values in complex types is buggy, so it's much safer
+		# to quasi-hardcode the number of metadata fields like this, even if it's cringe
+		String? a_key
+		String? a_value
+		String? b_key
+		String? b_value
+		String? c_key
+		String? c_value
+		String? d_key
+		String? d_value
+		String? e_key
+		String? e_value
+
 		# runtime attributes
 		Int addldisk = 10
 		Int cpu      = 8
@@ -135,7 +150,51 @@ task make_mask_and_diff_and_process_metadata {
 	fi
 
 	# this section only exectures if not failing
-			
+	python3 CODE <<
+	a_key =  "~{a_key}"
+	a_value = "~{a_value}"
+	b_key =  "~{b_key}"
+	b_value = "~{b_value}"
+	c_key =  "~{c_key}"
+	c_value = "~{c_value}"
+	d_key =  "~{d_key}"
+	d_value = "~{d_value}"
+	e_key =  "~{e_key}"
+	e_value = "~{e_value}"
+
+	valid_keys = []
+	for key in [a_key, b_key, c_key, d_key, e_key]:
+		if key == '' or key == ' ':
+			key = "UNDEFINED"
+		valid_keys.append(key)
+	valid_values = []
+	for value in [a_value, b_value, c_value, d_value, e_value]:
+		if value == '' or value == ' ':
+				value = "UNDEFINED"
+			valid_values.append(value)
+
+	metadata_dict = {a_key: a_value, b_key: b_value, c_key: c_value, d_key: d_value, e_key: e_value}
+	valid_metadata_dict = dict()
+	for keys, values in metadata_dict.items():
+		if keys == "UNDEFINED" and values == "UNDEFINED":
+			continue
+		elif keys == "UNDEFINED": # and values does not
+			print(f"WARNING: Got metadata value {value} with undefined key")
+			continue
+		else:
+			print(f"{key}: {value}")
+			valid_metadata_dict[key] = value
+	
+	# turn this into something WDL can use
+	header = "sample\t" + "\t".join(valid_metadata.keys())
+	body = "~{basename_vcf}.diff\t" + "\t".join(valid_metadata.keys())
+	with open('header.txt', 'w') as f:
+		f.write(header)
+	with open('body.txt', 'w') as f:
+		f.write(body)
+	CODE
+
+	# how long did this take?
 	end=$(date +%s)
 	seconds=$(echo "$end - $start" | bc)
 	minutes=$(echo "$seconds" / 60 | bc)
@@ -161,6 +220,8 @@ task make_mask_and_diff_and_process_metadata {
 		File? diff = basename_vcf+".diff"
 		File? report = basename_vcf+".report"
 		File? histogram = "histogram.txt"
+		String? metadata_fields = read_string("header.txt")
+		String? metadata_values = read_string("body.txt")
 		String errorcode = read_string("ERROR")
 	}
 }
