@@ -122,6 +122,12 @@ task make_mask_and_diff_and_process_metadata {
 				pretty_percent=$(printf "%0.2f" "$percent_low_coverage")
 				echo FAILURE - "$pretty_percent""%" is above "~{max_ratio_low_coverage_sites_per_sample}""%" cutoff
 				echo VCF2DIFF_"$pretty_percent"_PCT_BELOW_"~{min_coverage_per_site}"x_COVERAGE >> ERROR
+				end=$(date +%s)
+				seconds=$(echo "$end - $start" | bc)
+				minutes=$(echo "$seconds" / 60 | bc)
+				echo "Finished in about $minutes minutes ($seconds sec))"
+				ls -lha
+				exit 0
 			fi
 		fi
 	fi
