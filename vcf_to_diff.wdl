@@ -100,28 +100,29 @@ task make_mask_and_diff_and_process_metadata {
 		then
 			echo "Scientific notation detected, so it's likely this sample is very much passing."
 			echo "PASS" >> ERROR
-			exit 0
-		fi
 		
-		percent_low_coverage=$(echo "$amount_low_coverage"*100 | bc)
-		echo "$percent_low_coverage percent of ~{basename_vcf} is below ~{min_coverage_per_site}x coverage."
-		
-		# piping an inequality to `bc` will return 0 if false, 1 if true
-		is_bigger=$(echo "$amount_low_coverage>~{max_ratio_low_coverage_sites_per_sample}" | bc)
-		if [[ $is_bigger == 0 ]]
-		then
-			# amount of low coverage is BELOW the removal threshold: sample passes
-			echo "PASS" >> ERROR
-	
+		# not using scientific notation
 		else
-			# amount of low coverage is ABOVE the removal threshold: sample fails
-			if [[ "~{force_diff}" == "false" ]]
+			percent_low_coverage=$(echo "$amount_low_coverage"*100 | bc)
+			echo "$percent_low_coverage percent of ~{basename_vcf} is below ~{min_coverage_per_site}x coverage."
+			
+			# piping an inequality to `bc` will return 0 if false, 1 if true
+			is_bigger=$(echo "$amount_low_coverage>~{max_ratio_low_coverage_sites_per_sample}" | bc)
+			if [[ $is_bigger == 0 ]]
 			then
-				rm "~{basename_vcf}.diff"
+				# amount of low coverage is BELOW the removal threshold: sample passes
+				echo "PASS" >> ERROR
+		
+			else
+				# amount of low coverage is ABOVE the removal threshold: sample fails
+				if [[ "~{force_diff}" == "false" ]]
+				then
+					rm "~{basename_vcf}.diff"
+				fi
+				pretty_percent=$(printf "%0.2f" "$percent_low_coverage")
+				echo FAILURE - "$pretty_percent""%" is above "~{max_ratio_low_coverage_sites_per_sample}""%" cutoff
+				echo VCF2DIFF_"$pretty_percent"_PCT_BELOW_"~{min_coverage_per_site}"x_COVERAGE >> ERROR
 			fi
-			pretty_percent=$(printf "%0.2f" "$percent_low_coverage")
-			echo FAILURE - "$pretty_percent""%" is above "~{max_ratio_low_coverage_sites_per_sample}""%" cutoff
-			echo VCF2DIFF_"$pretty_percent"_PCT_BELOW_"~{min_coverage_per_site}"x_COVERAGE >> ERROR
 		fi
 	fi
 			
