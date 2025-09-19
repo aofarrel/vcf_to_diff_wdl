@@ -167,8 +167,8 @@ task make_mask_and_diff_and_process_metadata {
 	valid_values = []
 	for value in [a_value, b_value, c_value, d_value, e_value]:
 		if value == '' or value == ' ':
-				value = "UNDEFINED"
-			valid_values.append(value.strip("'").strip('"'))
+			value = "UNDEFINED"
+		valid_values.append(value.strip("'").strip('"'))
 
 	metadata_dict = {a_key: a_value, b_key: b_value, c_key: c_value, d_key: d_value, e_key: e_value}
 	valid_metadata_dict = dict()

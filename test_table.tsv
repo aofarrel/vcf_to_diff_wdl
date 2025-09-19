@@ -1,6 +1,11 @@
-entity:sample_id	county	date_collected	median_coverage	mean_coverge
-foo	SF			5
-bar	['']	2025-01-01	5	5
-bizz	Lake	2025-01-02	9	8.5
-buzz			
-zip	LA	''	20	[]
+entity:INSTI_id	county	date_collected	median_coverage	mean_coverge	notes
+SAMEA11961644	SF			5	passing
+SAMEA9977641	['']	2025-01-01	5	5	passing
+SAMEA6875586	Lake	2025-01-02	9	8.5	passing
+SAMN16521767					passing
+SAMEA4846676	LA	''	20	[]	passing
+foo	SF			5	failing
+bar	['']	2025-01-01	5	5	failing
+bizz	Lake	2025-01-02	9	8.5	failing
+buzz					failing
+fizz	LA	''	20	[]	failing
