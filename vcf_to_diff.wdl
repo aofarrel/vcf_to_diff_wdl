@@ -184,7 +184,7 @@ task make_mask_and_diff_and_process_metadata {
 	
 	# turn this into something WDL can use
 	header = "sample\t" + "\t".join(valid_metadata_dict.keys())
-	body = "~{basename_vcf}.diff\t" + "\t".join(valid_metadata_dict.keys())
+	body = "~{basename_vcf}\t" + "\t".join(valid_metadata_dict.keys())
 	with open('header.txt', 'w') as f:
 		f.write(header)
 	with open('body.txt', 'w') as f:
