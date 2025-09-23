@@ -162,7 +162,7 @@ task make_mask_and_diff_and_process_metadata {
 	valid_keys = []
 	for key in [a_key, b_key, c_key, d_key, e_key]:
 		print(key)
-		if key == '' or key == ' ':
+		if key == '' or key == ' ' or key == "'":
 			print(f"key [{key}] effectively is undefined")
 			key = "UNDEFINED"
 		print(f"adding {key} to valid_keys")
@@ -171,14 +171,15 @@ task make_mask_and_diff_and_process_metadata {
 	valid_values = []
 	for value in [a_value, b_value, c_value, d_value, e_value]:
 		print(value)
-		if value == '' or value == ' ':
+		if value == '' or value == ' ' or value == "'":
 			print(f"value [{value}] effectively is undefined")
 			value = "UNDEFINED"
 		print(f"adding {value} to valid_values")
 		valid_values.append(value.strip("'").strip('"'))
 		print(f"valid_values: {valid_values}")
 
-	metadata_dict = {a_key: a_value, b_key: b_value, c_key: c_value, d_key: d_value, e_key: e_value}
+	assert len(valid_keys) == len(valid_values)
+	metadata_dict = dict(zip(valid_keys, valid_values))
 	valid_metadata_dict = dict()
 	for keys, values in metadata_dict.items():
 		if keys == "UNDEFINED" and values == "UNDEFINED":
