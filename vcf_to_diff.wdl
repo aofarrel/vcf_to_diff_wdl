@@ -183,17 +183,19 @@ task make_mask_and_diff_and_process_metadata {
 	valid_metadata_dict = dict()
 	for keys, values in metadata_dict.items():
 		if keys == "UNDEFINED" and values == "UNDEFINED":
+			print("Keys and values is undefined, dropping")
 			continue
 		elif keys == "UNDEFINED": # and values does not
 			print(f"WARNING: Got metadata value {value} with undefined key")
 			continue
 		else:
-			print(f"{key}: {value}")
-			valid_metadata_dict[key] = value
+			# it's okay if value is undefined
+			print(f"{keys}: {values}")
+			valid_metadata_dict[keys] = values
 	
 	# turn this into something WDL can use
 	header = "sample\t" + "\t".join(valid_metadata_dict.keys())
-	body = "~{basename_vcf}\t" + "\t".join(valid_metadata_dict.keys())
+	body = "~{basename_vcf}\t" + "\t".join(valid_metadata_dict.values())
 	with open('header.txt', 'w') as f:
 		f.write(header)
 	with open('body.txt', 'w') as f:
