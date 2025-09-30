@@ -37,6 +37,8 @@ task make_mask_and_diff_and_process_metadata {
 		String? d_value
 		String? e_key
 		String? e_value
+		String? f_key
+		String? f_value
 
 		# runtime attributes
 		Int addldisk = 10
@@ -133,20 +135,18 @@ task make_mask_and_diff_and_process_metadata {
 					rm "~{basename_vcf}.diff"
 				fi
 				pretty_percent=$(printf "%0.2f" "$percent_low_coverage")
-				echo FAILURE - "$pretty_percent""%" is above "~{max_ratio_low_coverage_sites_per_sample}""%" cutoff
+				echo FAILURE - "$pretty_percent""%" is above "~{min_coverage_per_site}""%" cutoff
 				echo VCF2DIFF_"$pretty_percent"_PCT_BELOW_"~{min_coverage_per_site}"x_COVERAGE_"("MAX_"$maximium_percent_low_coverage"_PCT")" >> ERROR
 
 				end=$(date +%s)
 				seconds=$(echo "$end - $start" | bc)
 				minutes=$(echo "$seconds" / 60 | bc)
-				echo "Finished in about $minutes minutes ($seconds sec))"
-				ls -lha
-				exit 0
+				echo "Finished in about $minutes minutes ($seconds sec)) -- although we QC failed, we'll still write metadata"
 			fi
 		fi
 	fi
 
-	# this section only exectures if not failing
+	# this executes even if a sample is failing
 	python3 << CODE
 	a_key =  "~{a_key}"
 	a_value = "~{a_value}"
@@ -158,25 +158,28 @@ task make_mask_and_diff_and_process_metadata {
 	d_value = "~{d_value}"
 	e_key =  "~{e_key}"
 	e_value = "~{e_value}"
+	f_key = "~{f_key}"
+	f_value = "~{f_value}"
+
+	with open('ERROR') as f:
+		status = f.readline()
 
 	valid_keys = []
-	for key in [a_key, b_key, c_key, d_key, e_key]:
-		print(key)
+	for key in [a_key, b_key, c_key, d_key, e_key, f_key]:
 		if key == '' or key == ' ' or key == "'":
 			print(f"key [{key}] effectively is undefined")
 			key = "UNDEFINED"
 		print(f"adding {key} to valid_keys")
 		valid_keys.append(key.strip("'").strip('"'))
-		print(f"valid_keys: {valid_keys}")
+	print(f"valid_keys: {valid_keys}")
 	valid_values = []
-	for value in [a_value, b_value, c_value, d_value, e_value]:
-		print(value)
+	for value in [a_value, b_value, c_value, d_value, e_value, f_value]:
 		if value == '' or value == ' ' or value == "'":
 			print(f"value [{value}] effectively is undefined")
 			value = "UNDEFINED"
 		print(f"adding {value} to valid_values")
 		valid_values.append(value.strip("'").strip('"'))
-		print(f"valid_values: {valid_values}")
+	print(f"valid_values: {valid_values}")
 
 	assert len(valid_keys) == len(valid_values)
 	metadata_dict = dict(zip(valid_keys, valid_values))
@@ -194,12 +197,22 @@ task make_mask_and_diff_and_process_metadata {
 			valid_metadata_dict[keys] = values
 	
 	# turn this into something WDL can use
-	header = "sample\t" + "\t".join(valid_metadata_dict.keys())
-	body = "~{basename_vcf}\t" + "\t".join(valid_metadata_dict.values())
-	with open('header.txt', 'w') as f:
-		f.write(header)
-	with open('body.txt', 'w') as f:
-		f.write(body)
+	# for maximum compatibility, we're going to try tabs AND commas
+	
+	header_tsv = "sample\tstatus\t" + "\t".join(valid_metadata_dict.keys())
+	body_tsv = f"~{basename_vcf}\t{status}\t" + "\t".join(valid_metadata_dict.values())
+	metadata_tsv = header_tsv + "\n" + body_tsv
+	header_tsv, body_tsv, metadata_tsv = header_tsv[:-1], body_tsv[:-1], metadata_tsv[:-1]
+
+	header_csv = "sample,status," + ",".join(valid_metadata_dict.keys())
+	body_csv = f"~{basename_vcf},{status}," + ",".join(valid_metadata_dict.values())
+	metadata_csv = header_csv + "\n" + body_csv
+	header_csv, body_csv, metadata_csv = header_csv[:-1], body_csv[:-1], metadata_csv[:-1]
+
+	for string, file in {header_tsv: "header.tsv", body_tsv: "body.tsv", metadata_tsv: "metadata.tsv", header_csv: "header.csv", body_csv: "body.csv", metadata_csv: "metadata.csv"}.items():
+		with open(file, 'w') as f:
+			f.write(string)
+
 	CODE
 
 	# how long did this take?
@@ -228,8 +241,12 @@ task make_mask_and_diff_and_process_metadata {
 		File? diff = basename_vcf+".diff"
 		File? report = basename_vcf+".report"
 		File? histogram = "histogram.txt"
-		String? metadata_fields = read_string("header.txt") #!UnnecessaryQuantifier
-		String? metadata_values = read_string("body.txt")   #!UnnecessaryQuantifier
+		String meta_header_tsv = read_string("header.tsv")
+		String meta_header_csv = read_string("header.csv")
+		String meta_values_tsv = read_string("body.tsv")
+		String meta_values_csv = read_string("body.csv")
+		String meta_full_tsv = read_string("metadata.tsv")
+		String meta_full_csv = read_string("metadata.csv")
 		String errorcode = read_string("ERROR")
 	}
 }
