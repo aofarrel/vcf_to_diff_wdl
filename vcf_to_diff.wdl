@@ -364,7 +364,7 @@ task make_mask_and_diff {
 				fi
 				pretty_percent=$(printf "%0.2f" "$percent_low_coverage")
 				echo FAILURE - "$pretty_percent""%" is above "~{min_coverage_per_site}""%"
-				VCF2DIFF_"$pretty_percent"_PCT_BELOW_"~{min_coverage_per_site}"x_COVERAGE_"("MAX_"$maximium_percent_low_coverage"_PCT")" >> ERROR
+				echo VCF2DIFF_"$pretty_percent"_PCT_BELOW_"~{min_coverage_per_site}"x_COVERAGE_"("MAX_"$maximium_percent_low_coverage"_PCT")" >> ERROR
 			fi
 		fi
 	fi
