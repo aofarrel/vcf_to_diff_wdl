@@ -136,7 +136,7 @@ task make_mask_and_diff_and_process_metadata {
 				fi
 				pretty_percent=$(printf "%0.2f" "$percent_low_coverage")
 				echo FAILURE - "$pretty_percent""%" is above "~{min_coverage_per_site}""%" cutoff
-				echo VCF2DIFF_"$pretty_percent"_PCT_BELOW_"~{min_coverage_per_site}"x_COVERAGE_"("MAX_"$maximium_percent_low_coverage"_PCT")" >> ERROR
+				echo VCF2DIFF_"$pretty_percent"_PCT_BELOW_~{min_coverage_per_site}x_COVERAGE_\(MAX_"$maximium_percent_low_coverage"_PCT\) >> ERROR
 
 				end=$(date +%s)
 				seconds=$(echo "$end - $start" | bc)
@@ -364,7 +364,7 @@ task make_mask_and_diff {
 				fi
 				pretty_percent=$(printf "%0.2f" "$percent_low_coverage")
 				echo FAILURE - "$pretty_percent""%" is above "~{min_coverage_per_site}""%"
-				echo VCF2DIFF_"$pretty_percent"_PCT_BELOW_"~{min_coverage_per_site}"x_COVERAGE_"("MAX_"$maximium_percent_low_coverage"_PCT")" >> ERROR
+				echo VCF2DIFF_"$pretty_percent"_PCT_BELOW_~{min_coverage_per_site}x_COVERAGE_\(MAX_"$maximium_percent_low_coverage"_PCT\) >> ERROR
 			fi
 		fi
 	fi
@@ -476,7 +476,7 @@ task make_diff_from_vcf_and_mask {
 			fi
 			pretty_percent=$(printf "%0.2f" "$percent_low_coverage")
 			echo FAILURE - "$pretty_percent""%" is above "~{max_ratio_low_coverage_sites_per_sample}""%" cutoff
-			echo VCF2DIFF_"$pretty_percent"_PCT_BELOW_"~{min_coverage_per_site}"x_COVERAGE >> ERROR
+			echo VCF2DIFF_"$pretty_percent"_PCT_BELOW_~{min_coverage_per_site}x_COVERAGE >> ERROR
 		fi
 	fi
 	>>>
