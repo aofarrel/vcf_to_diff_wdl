@@ -71,10 +71,8 @@ task make_mask_and_diff {
 		bedtools genomecov -ibam sorted_u_~{basename_bam}.bam > histogram.txt
 	fi
 	
-	echo "Pulling diff script..."
-	wget https://raw.githubusercontent.com/aofarrel/parsevcf/1.3.1/vcf_to_diff_script.py
 	echo "Running script..."
-	python3 vcf_to_diff_script.py -v ~{vcf} \
+	python /scripts/vcf_to_diff_script.py -v ~{vcf} \
 	-d . \
 	-tbmf ${mask} \
 	-bed ~{basename_bam}_below_~{min_coverage_per_site}x_coverage.bedgraph \
@@ -127,7 +125,7 @@ task make_mask_and_diff {
 
 	runtime {
 		cpu: cpu
-		docker: "ashedpotatoes/sranwrp:1.1.15"
+		docker: "ashedpotatoes/sranwrp:1.3.0"
 		disks: "local-disk " + finalDiskSize + " HDD"
 		maxRetries: "${retries}"
 		memory: "${memory} GB"
